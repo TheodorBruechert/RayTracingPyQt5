@@ -83,7 +83,7 @@ class Coupler:
        self.img_path = img_path 
     
     def render(self):
-        subprocess.run([self.exc, self.img_path], shell=True)
+        subprocess.call([self.exc, self.img_path], shell=True)
         return 0.0
 
 
