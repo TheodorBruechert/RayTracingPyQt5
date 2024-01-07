@@ -11,8 +11,6 @@ import time
 import subprocess
 
 
-from PyQt5.QtWidgets import QWidget
-
 class Timer(object):
     def __init__(self) -> None:
         self.last_time_called = time.time()
@@ -83,13 +81,14 @@ class Coupler:
        self.img_path = img_path 
     
     def render(self):
-        subprocess.run([self.exc, self.img_path], shell=True)
+        subprocess.call([self.exc, self.img_path])
         return 0.0
 
 
 
 
 def main():
+    subprocess.run(["make", "-f", "Makefile"], cwd="./build", check=True)
     app = QApplication([])
     coupler = Coupler("./build/render", "resources/image.png")
     window = Window(coupler)
