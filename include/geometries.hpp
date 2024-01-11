@@ -8,10 +8,10 @@
 
 class Object {
 private: 
-    glm::vec4 color;
+    glm::vec4 m_color;
 public:
-    virtual bool CheckCollision(glm::vec3 cameraPosition, glm::vec3 ray, float& t0, float& t1) const = 0;
-    glm::vec4 getColor() { return color;}
+    virtual bool CheckCollision(const glm::vec3& cameraPosition,const glm::vec3& ray, float& t0, float& t1) const = 0;
+    glm::vec4 getColor() { return m_color;}
 };
 
 
@@ -27,7 +27,7 @@ public:
     Sphere(glm::vec3 center, float radius)
         : m_center(center), m_radius(radius) {}
 
-    bool CheckCollision(glm::vec3 cameraPosition, glm::vec3 ray, float& t0, float& t1) const;
+    bool CheckCollision(const glm::vec3& cameraPosition,const glm::vec3& ray, float& t0, float& t1) const;
     glm::vec3 GetCenter() const { return m_center; }
     float GetRadius() const { return m_radius; }
 };

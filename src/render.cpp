@@ -6,18 +6,13 @@
 
 
 Renderer::Renderer(std::string imgPath, std::size_t width, std::size_t height)
-    : m_imgPath(imgPath), m_imgData(new uint32_t[width*height]), m_aspectRatio(width / static_cast<float>(height)), m_width(width), m_height(height) {}
+    : m_imgPath(imgPath), m_imgData(new uint32_t[width*height]), m_aspectRatio(width / static_cast<float>(height)), m_width(width), m_height(height), m_scene(glm::vec3(0, 0, -2), glm::vec3(1.0, 2.0, 0.0)), m_sphere(0.5) {}
 
 Renderer::~Renderer() {
     delete[] m_imgData;
 }
 
-void Renderer::SetCameraPosition(glm::vec3 cameraPosition) {
-    m_cameraPosition = cameraPosition;
-    m_cameraPositionMagnitude = magnitude(m_cameraPosition);
-}
-
-milliseconds Renderer::Render() {
+py::array_t<uint32_t> Renderer::Render() {
     //Render
     auto beginTime = std::chrono::high_resolution_clock::now();
 
@@ -36,19 +31,19 @@ milliseconds Renderer::Render() {
     //check elapsed Time
     milliseconds duration = std::chrono::duration_cast<milliseconds>(std::chrono::high_resolution_clock::now() - beginTime);
     SaveImg();
-    return duration;
+    return py::array_t<uint32_t>(m_height*m_width, m_imgData);
 }
 
-uint32_t Renderer::PerPixel(const std::size_t x, const std::size_t y, const Scene scene, const Sphere sphere) {
+uint32_t Renderer::PerPixel(const std::size_t& x, const std::size_t& y, const Scene& scene, const Sphere& sphere) {
 //default color:
     glm::vec4 pixelColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glm::vec3 ray = glm::vec3(m_aspectRatio * ((x / (float)m_width) * 2.0f - 1.0f), (y / (float)m_height) * 2.0f - 1.0f, -1.0f);
     //t0 < t1 therefore, the hit point of the ray is at cameraPosition + t0 * ray
     float t0, t1;
-    if (sphere.CheckCollision(m_cameraPosition, ray, t0, t1)) {
+    if (sphere.CheckCollision(m_scene.getCamera(), ray, t0, t1)) {
         pixelColor = { 1.0f, 0.0f, 0.0f, 1.0f };
-        glm::vec3 visualPointOnSphere = m_cameraPosition + t0 * ray;
+        glm::vec3 visualPointOnSphere = m_scene.getCamera() + t0 * ray;
         glm::vec3 visualPointToLightSource = scene.getLightSource() - visualPointOnSphere;
         normalize(visualPointToLightSource);
         float lightFactor = clip(glm::dot(visualPointToLightSource, visualPointOnSphere - sphere.GetCenter()) / (sphere.GetRadius()), 0.0f);

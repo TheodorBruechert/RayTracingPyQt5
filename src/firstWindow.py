@@ -74,7 +74,7 @@ class Window(QMainWindow):
         time_elapsed = self.coupler.render()
         self.load_image()
         self.render_time.setText(f"{time_elapsed:.5}" + "ms")
-
+    
 class Coupler:
     def __init__(self, render_executable_path, img_path) -> None:
        self.exc = render_executable_path
@@ -85,7 +85,7 @@ class Coupler:
         return 0.0
 
 
-
+import build.rendererModule
 
 def main():
     subprocess.run(["make", "-f", "Makefile"], cwd="./build", check=True)

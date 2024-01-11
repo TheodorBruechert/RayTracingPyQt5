@@ -11,6 +11,10 @@
 #include <glm/gtc/constants.hpp>
 #include "scene.hpp"
 #include "geometries.hpp"
+#include <pybind11/numpy.h>
+
+namespace  py = pybind11;
+
 using milliseconds = std::chrono::milliseconds;
 
 
@@ -21,21 +25,17 @@ private:
     float m_aspectRatio;
     std::size_t m_width;
     std::size_t m_height;
-    // Camera
-    glm::vec3 m_cameraPosition;
-    
-    float m_cameraPositionMagnitude;
-    
+
     Scene m_scene;
     Sphere m_sphere;
 
     //returns a color in RGBA
-    uint32_t PerPixel(const std::size_t x, const std::size_t y, const Scene scene, const Sphere sphere);
+    uint32_t PerPixel(const std::size_t& x, const std::size_t& y, const Scene& scene, const Sphere& sphere);
 public:
     Renderer(std::string imgPath, std::size_t width, std::size_t height);
     ~Renderer();
 
-    milliseconds Render();
+    py::array_t<uint32_t> Render();
     uint32_t ConvertFloatRGBAToABGR(const glm::vec4& color);
     void SaveImg();
 };
