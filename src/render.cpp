@@ -30,7 +30,8 @@ py::array_t<uint32_t> Renderer::Render() {
     }
     //check elapsed Time
     milliseconds duration = std::chrono::duration_cast<milliseconds>(std::chrono::high_resolution_clock::now() - beginTime);
-    SaveImg();
+    std::cout << "raw render took " << duration.count() << "ms" << std::endl;
+    
     return py::array_t<uint32_t>(m_height*m_width, m_imgData);
 }
 
@@ -42,7 +43,7 @@ uint32_t Renderer::PerPixel(const std::size_t& x, const std::size_t& y, const Sc
     //t0 < t1 therefore, the hit point of the ray is at cameraPosition + t0 * ray
     float t0, t1;
     if (sphere.CheckCollision(m_scene.getCamera(), ray, t0, t1)) {
-        pixelColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+        pixelColor = { 1.0f, 0.0, 0.0f, 1.0f };
         glm::vec3 visualPointOnSphere = m_scene.getCamera() + t0 * ray;
         glm::vec3 visualPointToLightSource = scene.getLightSource() - visualPointOnSphere;
         normalize(visualPointToLightSource);
@@ -53,13 +54,13 @@ uint32_t Renderer::PerPixel(const std::size_t& x, const std::size_t& y, const Sc
         pixelColor = glm::clamp(pixelColor, glm::vec4{0.0f}, glm::vec4{1.0f});
     }
 
-    return ConvertFloatRGBAToABGR(pixelColor);
+    return ConvertFloatRGBAToARGB(pixelColor);
 }
 
 
 //should be clamped color between 0 and 1
-uint32_t Renderer::ConvertFloatRGBAToABGR(const glm::vec4& color) {
-    return  (((uint8_t)(color.a*255.0f) << 24) | ((uint8_t)(color.b*255.0f) << 16) | ((uint8_t)(color.g*255.0f) << 8) | ((uint8_t)(color.r*255.0f)));
+uint32_t Renderer::ConvertFloatRGBAToARGB(const glm::vec4& color) {
+    return  (((uint8_t)(color.a*255.0f) << 24) | ((uint8_t)(color.r*255.0f) << 16) | ((uint8_t)(color.g*255.0f) << 8) | ((uint8_t)(color.b*255.0f)));
 }
 
 void Renderer::SaveImg() {

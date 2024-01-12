@@ -4,12 +4,13 @@ from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPalette
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QImage
 import sys
 import os
 import time
 import subprocess
 
+from rendererModule import Renderer
 
 class Timer(object):
     def __init__(self) -> None:
@@ -22,10 +23,13 @@ class Timer(object):
 class Window(QMainWindow):
     def __init__(self, coupler) -> None:
         super().__init__()
+        self.renderer = Renderer("resources/image.png", 1080, 800)
+        self.img_array = self.renderer.Render()
+
         self.coupler = coupler
         self.img_path = self.coupler.img_path
-        coupler.render()
         self.setWindowTitle("RayTracer")
+        
 
         #create main context
         self.central_widget = QWidget()
@@ -59,21 +63,22 @@ class Window(QMainWindow):
         self.render_time = QLabel("")
         self.right_layout.addWidget(self.render_time)
 
-        self.load_image()
+        self.render()
+
 
     def load_image(self):
-        if not os.path.isfile(self.img_path):
-            print("ERROR: Image dosent exist")
-            return QLabel(self)
-        pixmap = QPixmap(self.img_path)
+        qimage = QImage(self.img_array.data, 1080, 800, QImage.Format_ARGB32)
+        pixmap = QPixmap.fromImage(qimage)
         self.imgContainer.setPixmap(pixmap)
         self.imgContainer.resize(pixmap.width(), pixmap.height())
         #self.resize(max(self.width(), pixmap.width()), max(self.height(), pixmap.height()))
 
     def render(self):
-        time_elapsed = self.coupler.render()
+        begin = time.time()
+        self.img_array = self.renderer.Render()
         self.load_image()
-        self.render_time.setText(f"{time_elapsed:.5}" + "ms")
+        elapsed_in_ms = (time.time() - begin)*1000
+        print(elapsed_in_ms, "ms elapsed for rendering to screen")
     
 class Coupler:
     def __init__(self, render_executable_path, img_path) -> None:
@@ -85,15 +90,14 @@ class Coupler:
         return 0.0
 
 
-import build.rendererModule
 
-def main():
-    subprocess.run(["make", "-f", "Makefile"], cwd="./build", check=True)
-    app = QApplication([])
-    coupler = Coupler("./build/render", "resources/image.png")
-    window = Window(coupler)
-    window.show()
-    sys.exit(app.exec())
+
 
 if __name__ == "__main__":
+    def main():
+        app = QApplication([])
+        coupler = Coupler("./build/render", "resources/image.png")
+        window = Window(coupler)
+        window.show()
+        sys.exit(app.exec())
     main()

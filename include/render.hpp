@@ -36,6 +36,6 @@ public:
     ~Renderer();
 
     py::array_t<uint32_t> Render();
-    uint32_t ConvertFloatRGBAToABGR(const glm::vec4& color);
+    uint32_t ConvertFloatRGBAToARGB(const glm::vec4& color);
     void SaveImg();
 };
